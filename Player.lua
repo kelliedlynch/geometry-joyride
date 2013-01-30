@@ -5,20 +5,17 @@ _P.__index = _P
 function _P.new(r)
 	local player = {}
 	setmetatable(player, _P)
-	print("_P", _P)
 	local startX = -_G.screenWidth/2 + _G.screenWidth/5
-	print("player table", player)
-	for k,v in pairs(player) do
-		print('k,v', k,v)
-	end
 	player:drawSprite(r, startX)
 
 	local body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
 	body:setFixedRotation(true)
 	local fixture = body:addCircle(startX, 0, r)
 	fixture:setDensity(1)
-
-	fixture:setCollisionHandler(player.onCollideWithTerrain, MOAIBox2DArbiter.ALL, FILTER_ACTIVE_TERRAIN)
+	fixture:setFilter(FILTER_PLAYER)
+	fixture:setCollisionHandler(player.onCollision, MOAIBox2DArbiter.ALL)
+	-- fixture:setCollisionHandler(player.onFriendlyCollision, MOAIBox2DArbiter.ALL, FILTER_FRIENDLY_OBJECT)
+	-- fixture:setCollisionHandler(player.onDeadlyCollision, MOAIBox2DArbiter.ALL, bit32.bor(FILTER_FRIENDLY_OBJECT, FILTER_DEADLY_OBJECT))
 	player.shape:setParent(body)
 	body:resetMassData()
 	player.body = body
@@ -59,18 +56,34 @@ function _P:drawSprite(r, startX)
 	self.halo = halo
 end
 
-function _P.onCollideWithTerrain(event, player, obstacle)
-	if event == MOAIBox2DArbiter.BEGIN then _G.game.player.beginTerrainCollision(player, obstacle) end
+-- function _P.onFriendlyCollision(event, player, object)
+-- 	print("friendly collision")
+-- end
+
+function _P.onCollision(event, player, obstacle)
+	if obstacle:getFilter() == FILTER_DEADLY_OBJECT then
+		print("deadly collision")
+	elseif obstacle:getFilter() == FILTER_FRIENDLY_OBJECT then
+		print("friendly collision")
+	end
+	if event == MOAIBox2DArbiter.BEGIN then
+		if obstacle:getFilter() == FILTER_DEADLY_OBJECT then
+			print("deadly collision")
+			_G.game.player.beginDeadlyCollision(_G.game.player, player, obstacle)
+		elseif obstacle:getFilter() == FILTER_FRIENDLY_OBJECT then
+			print("friendly collision")
+		end
+	end
 	if event == MOAIBox2DArbiter.END then  end
 	if event == MOAIBox2DArbiter.PRE_SOLVE then  end
 	if event == MOAIBox2DArbiter.POST_SOLVE then  end
 end
 
-function _P.beginTerrainCollision(player, obstacle)
-	print("collide")
-	_G.game.player:destroy()
+function _P:beginDeadlyCollision(player, obstacle)
+	print("begin deadly collision")
+	self:destroy()
 	stopAction()
-	scroll:stop()
+	_G.game.thread:stop()
 	local thread = MOAICoroutine.new()
 	thread:run(
 		function()
@@ -79,7 +92,7 @@ function _P.beginTerrainCollision(player, obstacle)
 				--MOAICoroutine.blockOnAction(sparkSystem)
 				
 			end
-			print("done")
+			print("done exploding")
 			for body, v in pairs(activeTerrainBoxes) do
 				_G.gameLayer:removeProp(body.shape)
 				_G.gameLayer:removeProp(body.halo)
@@ -123,8 +136,7 @@ function _P:explode()
 
 	sparkDeck = MOAIGfxQuad2D.new ()
 	sparkDeck:setTexture(texture)
-	--sparkDeck:setTexture ( "moai.png" )
-	sparkDeck:setRect (-32, -32, 32, 32 )
+	sparkDeck:setRect (-24, -24, 24, 24 )
 
 	------------------------------
 	-- Particle scripts
@@ -162,36 +174,15 @@ function _P:explode()
 	-- and how fast / smooth it spreads. Note it is getting a random value from
 	-- one of the script registers
 	sparkRenderScript:easeDelta(MOAIParticleScript.PARTICLE_X, CONST(0), reg1, MOAIEaseType.SHARP_EASE_IN)
-	--sparkRenderScript:easeDelta(MOAIParticleScript.PARTICLE_X, CONST(0), reg1, MOAIEaseType.SHARP_SMOOTH)
 
 	-- this does the same over the y axis
 	sparkRenderScript:easeDelta(MOAIParticleScript.PARTICLE_Y, CONST(0), reg2, MOAIEaseType.SHARP_EASE_IN)
-	--sparkRenderScript:easeDelta(MOAIParticleScript.PARTICLE_Y, CONST(0), reg2, MOAIEaseType.SHARP_SMOOTH)
-
-
-	-- resize
-	--sparkRenderScript:ease(MOAIParticleScript.SPRITE_X_SCL, reg4, CONST(0.01), MOAIEaseType.EASE_IN)
-	--sparkRenderScript:ease(MOAIParticleScript.SPRITE_Y_SCL, reg4, CONST(0.01), MOAIEaseType.EASE_IN)
-
-	-- creates sparkling color
-	--sparkRenderScript:set(MOAIParticleScript.SPRITE_GLOW, reg3)
-	-- sparkRenderScript:set(MOAIParticleScript.SPRITE_RED, reg3 )
-	-- sparkRenderScript:set(MOAIParticleScript.SPRITE_BLUE, reg4 )
-	-- sparkRenderScript:set(MOAIParticleScript.SPRITE_GREEN, reg4 )
 
 	-- this sets a random starting rotation for each particle
 	sparkRenderScript:set ( MOAIParticleScript.SPRITE_ROT, reg3 )
 
-	-- this applies a random amount of rotation to each particle during its lifetime
-	--sparkRenderScript:ease ( MOAIParticleScript.SPRITE_ROT, CONST(0), reg3, MOAIEaseType.LINEAR )
-	--sparkRenderScript:ease                            ( MOAIParticleScript.SPRITE_ROT, CONST ( 0), CONST ( 360),MOAIEaseType.LINEAR)
-
 	-- this makes the particle fade out near the end of its lifetime
 	sparkRenderScript:ease ( MOAIParticleScript.SPRITE_OPACITY, CONST(.5), CONST(0), MOAIEaseType.EASE_IN )
-
-	-- this makes each particle randomly bigger or smaller than the original size
-	--sparkRenderScript:ease(MOAIParticleScript.SPRITE_X_SCL, CONST(0), CONST(1), MOAIEaseType.EASE_IN)
-	--sparkRenderScript:ease(MOAIParticleScript.SPRITE_Y_SCL, CONST(0), CONST(1), MOAIEaseType.EASE_IN)
 
 	------------------------------
 	-- Particle system
@@ -211,14 +202,6 @@ function _P:explode()
 
 	-- particle system can be inserted like a prop
 	_G.gameLayer:insertProp(sparkSystem)
-	--sparkSystem:setLoc(0,0)
-
-	-- sparkSystem = MOAIParticleEmitter.new()
-	-- sparkSystem:setRadius(30)
-	-- sparkSystem:setDeck(Deck)
-	-- sparkSystem:start()
-	-- _G.gameLayer:insertProp(sparkSystem)
-
 
 	------------------------------
 	-- Particle forces
@@ -239,8 +222,6 @@ function _P:explode()
 	sparkState:setTerm( 1, 3 )
 	sparkState:setInitScript(sparkInitScript )
 	sparkState:setRenderScript(sparkRenderScript )
-	--sparkState:setDamping(10)
-	--sparkState:pushForce (gravity)
 
 	-- sets the system to this state
 	sparkSystem:setState ( 1, sparkState )

@@ -8,8 +8,8 @@ local _P = {}
 _P[1] = {
 	[1] = {
 		time = 1,
-		action = "rectangle",
-		params = {100, 60, -100},
+		action = "coin",
+		params = {65, 65, -100},
 	},
 	[2] = {
 		time = 3,

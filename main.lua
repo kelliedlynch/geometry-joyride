@@ -26,8 +26,8 @@ _G.gameLayer:setBox2DWorld(_G.world)
 -- FILTER REFERENCE
 -- 
 FILTER_PLAYER = 0x01
-FILTER_ACTIVE_TERRAIN = 0x02
-FILTER_INACTIVE_BOX = 0x04
+FILTER_DEADLY_OBJECT = 0x02
+FILTER_FRIENDLY_OBJECT = 0x04
 FILTER_INACTIVE_TERRAIN = 0x08
 FILTER_GOAL = 0x16
 
@@ -55,13 +55,9 @@ function yield()
 	while touchDown do
 		if _G.game.player.body then
 			x,y = _G.game.player.shape:getLoc()
-		--local action = _G.player.shape:moveLoc(0, 1, .01, MOAIEaseType.LINEAR)
-		
 			_G.game.player.body:applyForce(0, 1000000)
 		end
-		--while action:isBusy() do
-			coroutine.yield()
-		--end
+		coroutine.yield()
 	end
 end
 

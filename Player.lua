@@ -1,38 +1,58 @@
-_P = {}
+local _P = {}
 
 _P.__index = _P
 
 function _P.new(r)
-	_P:drawSprite(r)
+	local player = {}
+	setmetatable(player, _P)
+	print("_P", _P)
+	local startX = -_G.screenWidth/2 + _G.screenWidth/5
+	print("player table", player)
+	for k,v in pairs(player) do
+		print('k,v', k,v)
+	end
+	player:drawSprite(r, startX)
 
-	local body = world:addBody(MOAIBox2DBody.DYNAMIC)
-	local fixture = body:addCircle(0, 0, r)
+	local body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
+	body:setFixedRotation(true)
+	local fixture = body:addCircle(startX, 0, r)
 	fixture:setDensity(1)
-	fixture:setCollisionHandler(_P.onCollideWithTerrain, MOAIBox2DArbiter.ALL, FILTER_ACTIVE_TERRAIN)
-	_P.shape:setParent(body)
-	body:resetMassData()
-	_P.body = body
 
+	fixture:setCollisionHandler(player.onCollideWithTerrain, MOAIBox2DArbiter.ALL, FILTER_ACTIVE_TERRAIN)
+	player.shape:setParent(body)
+	body:resetMassData()
+	player.body = body
+
+	return player
 end
 
-function _P:drawSprite(r)
+function _P:isAlive()
+	if self.body then
+		return true
+	else
+		return false
+	end
+end
+
+function _P:drawSprite(r, startX)
+	print("drawing sprite", startX, r)
 	local gfxQuad1 = MOAIGfxQuad2D.new()
-	gfxQuad1:setTexture("circleglow.png")
-	gfxQuad1:setRect (-r, -r, r, r )
+	gfxQuad1:setTexture("Resources/Images/circleglow.png")
+	gfxQuad1:setRect (startX-r, -r, startX+r, r )
 
 	local halo = MOAIProp2D.new()
 	halo:setDeck(gfxQuad1)
 	halo:setColor(.8, .8, 1, 1)
-	layer:insertProp(halo)
+	_G.gameLayer:insertProp(halo)
 
 	local gfxQuad2 = MOAIGfxQuad2D.new()
-	gfxQuad2:setTexture("circletex.png")
-	gfxQuad2:setRect(-r, -r, r, r)
+	gfxQuad2:setTexture("Resources/Images/circletex.png")
+	gfxQuad2:setRect(startX-r, -r, startX + r, r)
 
 	local shape = MOAIProp2D.new()
 	shape:setDeck(gfxQuad2)
 	shape:setColor(.5, .5, 1, 1)
-	layer:insertProp(shape)
+	_G.gameLayer:insertProp(shape)
 
 	halo:setParent(shape)
 	self.shape = shape
@@ -40,7 +60,7 @@ function _P:drawSprite(r)
 end
 
 function _P.onCollideWithTerrain(event, player, obstacle)
-	if event == MOAIBox2DArbiter.BEGIN then _P.beginTerrainCollision(player, obstacle) end
+	if event == MOAIBox2DArbiter.BEGIN then _G.game.player.beginTerrainCollision(player, obstacle) end
 	if event == MOAIBox2DArbiter.END then  end
 	if event == MOAIBox2DArbiter.PRE_SOLVE then  end
 	if event == MOAIBox2DArbiter.POST_SOLVE then  end
@@ -48,16 +68,9 @@ end
 
 function _P.beginTerrainCollision(player, obstacle)
 	print("collide")
-	local x, y = player:getBody():getWorldCenter()
-	_P.explode(x, y)
-	_P.body = nil
-	layer:removeProp(_P.shape)
-	layer:removeProp(_P.halo)
-	_P.shape = nil
-	_P.halo = nil
-	player:getBody():destroy()
+	_G.game.player:destroy()
 	stopAction()
-	spawnTerrain:stop()
+	scroll:stop()
 	local thread = MOAICoroutine.new()
 	thread:run(
 		function()
@@ -68,16 +81,27 @@ function _P.beginTerrainCollision(player, obstacle)
 			end
 			print("done")
 			for body, v in pairs(activeTerrainBoxes) do
-				layer:removeProp(body.shape)
-				layer:removeProp(body.halo)
+				_G.gameLayer:removeProp(body.shape)
+				_G.gameLayer:removeProp(body.halo)
 				body:destroy()
 				activeTerrainBoxes[body] = nil
 			end
-			Player.new(24)
-			TerrainGenerator.scrollTerrain()
+			--_G.player = nil
+			_G.game = _G.game.begin()
 		end
 		)
 
+end
+
+function _P:destroy()
+	print("destroying")
+	self:explode()
+	_G.gameLayer:removeProp(self.shape)
+	_G.gameLayer:removeProp(self.halo)
+	self.shape = nil
+	self.halo = nil
+	self.body:destroy()
+	self.body = nil
 end
 
 function stopAction()
@@ -86,7 +110,8 @@ function stopAction()
 	end
 end
 
-function _P.explode(x, y)
+function _P:explode()
+	local x, y = self.body:getWorldCenter()
 	print("explode", x, y)
 	local texture = MOAIImageTexture.new()
 	texture:init(16,16)
@@ -185,14 +210,14 @@ function _P.explode(x, y)
 	sparkSystem:start()
 
 	-- particle system can be inserted like a prop
-	layer:insertProp(sparkSystem)
+	_G.gameLayer:insertProp(sparkSystem)
 	--sparkSystem:setLoc(0,0)
 
 	-- sparkSystem = MOAIParticleEmitter.new()
 	-- sparkSystem:setRadius(30)
 	-- sparkSystem:setDeck(Deck)
 	-- sparkSystem:start()
-	-- layer:insertProp(sparkSystem)
+	-- _G.gameLayer:insertProp(sparkSystem)
 
 
 	------------------------------

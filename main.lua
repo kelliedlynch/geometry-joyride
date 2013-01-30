@@ -3,25 +3,24 @@ local deviceHeight = MOAIEnvironment.horizontalResolution
 local deviceWidth = MOAIEnvironment.verticalResolution
 if deviceWidth == nil then deviceWidth = 480 end
 if deviceHeight == nil then deviceHeight = 320 end
-MOAISim.openWindow("Geom Glow Test", deviceWidth, deviceHeight)
-MOAISim.setStep ( 1 / 60 )
+MOAISim.openWindow("Geometry Joyride", deviceWidth, deviceHeight)
+MOAISim.setStep(1/60)
 
 viewport = MOAIViewport.new()
 viewport:setSize(deviceWidth, deviceHeight)
-ScreenWidth, ScreenHeight = 480, 320
+_G.screenWidth, _G.screenHeight = 480, 320
 viewport:setScale(480, 320)
---viewport:setOffset(-1, -1)
 
-layer = MOAILayer2D.new()
-layer:setViewport(viewport)
-MOAISim.pushRenderPass(layer)
+_G.gameLayer = MOAILayer2D.new()
+_G.gameLayer:setViewport(viewport)
+MOAISim.pushRenderPass(_G.gameLayer)
 
-world = MOAIBox2DWorld.new()
-world:setGravity(0, -4)
-world:setUnitsToMeters(1/50)
-world:setDebugDrawEnabled(0)
-world:start()
-layer:setBox2DWorld(world)
+_G.world = MOAIBox2DWorld.new()
+_G.world:setGravity(0, -6)
+_G.world:setUnitsToMeters(1/50)
+_G.world:setDebugDrawEnabled(0)
+_G.world:start()
+_G.gameLayer:setBox2DWorld(_G.world)
 
 --------------------------------------------------------------------
 -- FILTER REFERENCE
@@ -33,22 +32,19 @@ FILTER_INACTIVE_TERRAIN = 0x08
 FILTER_GOAL = 0x16
 
 
-TerrainBody = world:addBody(MOAIBox2DBody.STATIC)
+TerrainBody = _G.world:addBody(MOAIBox2DBody.STATIC)
 
-local levelWidth, levelHeight = 480, 320
-local floorHeight = 1
+local levelWidth, levelHeight = 480, 310
 
 -- draw the edges of the screen
-local left = TerrainBody:addPolygon({-levelWidth/2, -levelHeight/2, -levelWidth/2, levelHeight/2, -levelWidth/2 - 1, -levelHeight/2})
-local right = TerrainBody:addPolygon({levelWidth/2, -levelHeight/2, levelWidth/2, levelHeight/2, levelWidth/2, -levelHeight/2})
-local ceiling = TerrainBody:addPolygon({-levelWidth/2, levelHeight/2, levelWidth/2, levelHeight/2, -levelWidth/2, levelHeight/2})
-local floor = TerrainBody:addPolygon({-levelWidth/2, -levelHeight/2 + floorHeight, levelWidth/2, -levelHeight/2 + floorHeight, -levelWidth/2, -levelHeight/2 + floorHeight})
+local left = TerrainBody:addChain({-levelWidth/2, -levelHeight/2, -levelWidth/2, levelHeight/2})
+local right = TerrainBody:addChain({levelWidth/2, -levelHeight/2, levelWidth/2, levelHeight/2})
+local ceiling = TerrainBody:addChain({-levelWidth/2, levelHeight/2, levelWidth/2, levelHeight/2})
+local floor = TerrainBody:addChain({-levelWidth/2, -levelHeight/2, levelWidth/2, -levelHeight/2})
 
-Player = require "Player"
-Player.new(24)
 
-TerrainGenerator = require "TerrainGenerator"
-TerrainGenerator.scrollTerrain()
+Game = require "Game"
+_G.game = Game.begin()
 
 function move_up()
 	local thread = MOAICoroutine.new()
@@ -57,11 +53,11 @@ end
 
 function yield()
 	while touchDown do
-		if Player.body then
-			x,y = Player.shape:getLoc()
-		--local action = Player.shape:moveLoc(0, 1, .01, MOAIEaseType.LINEAR)
+		if _G.game.player.body then
+			x,y = _G.game.player.shape:getLoc()
+		--local action = _G.player.shape:moveLoc(0, 1, .01, MOAIEaseType.LINEAR)
 		
-			Player.body:applyForce(0, 800000)
+			_G.game.player.body:applyForce(0, 1000000)
 		end
 		--while action:isBusy() do
 			coroutine.yield()
@@ -69,8 +65,11 @@ function yield()
 	end
 end
 
-function clickCallback ( down )
+function clickCallback(down)
 	if down then
+		-- if _G.game.thread(isBusy) then
+		-- 	_G.game:clickCallback(down)
+		-- end
 		touchDown = true
 		local thread = MOAICoroutine.new()
 		thread:run(yield)
@@ -91,16 +90,12 @@ else
 	MOAIInputMgr.device.touch:setCallback (
 
 	function ( eventType, idx, x, y, tapCount )
-		if MOAITouchSensor:getTouch() then
-			clickCallback(true)
-		end
-
 		-- pointerCallback ( x, y )
-		-- if eventType == MOAITouchSensor.TOUCH_DOWN then
-		-- 	clickCallback ( true )
-		-- elseif eventType == MOAITouchSensor.TOUCH_UP then
-		-- 	clickCallback ( false )
-		-- end
+		if eventType == MOAITouchSensor.TOUCH_DOWN then
+			clickCallback ( true )
+		elseif eventType == MOAITouchSensor.TOUCH_UP then
+			clickCallback ( false )
+		end
 	end
 	)
 end

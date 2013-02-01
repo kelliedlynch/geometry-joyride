@@ -11,9 +11,18 @@ viewport:setSize(deviceWidth, deviceHeight)
 _G.screenWidth, _G.screenHeight = 480, 320
 viewport:setScale(480, 320)
 
+--------------------------------------------------------------------
+-- INITIALIZE GAME LAYERS
+--
 _G.gameLayer = MOAILayer2D.new()
 _G.gameLayer:setViewport(viewport)
 MOAISim.pushRenderPass(_G.gameLayer)
+_G.hudLayer = MOAILayer2D.new()
+_G.hudLayer:setViewport(viewport)
+MOAISim.pushRenderPass(_G.hudLayer)
+--
+-- END GAME LAYERS
+--------------------------------------------------------------------
 
 _G.world = MOAIBox2DWorld.new()
 _G.world:setGravity(0, -6)
@@ -23,13 +32,30 @@ _G.world:start()
 _G.gameLayer:setBox2DWorld(_G.world)
 
 --------------------------------------------------------------------
--- FILTER REFERENCE
+-- PHYSICS OBJECT FILTERS
 -- 
 FILTER_PLAYER = 0x01
 FILTER_DEADLY_OBJECT = 0x02
 FILTER_FRIENDLY_OBJECT = 0x04
 FILTER_INACTIVE_TERRAIN = 0x08
 FILTER_GOAL = 0x16
+--
+-- END PHYSICS OBJECT FILTERS
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+-- FONTS AND STYLES
+--
+DEFAULT_FONT = MOAIFont.new()
+DEFAULT_FONT:load('Resources/Fonts/arial-rounded.TTF')
+
+DEFAULT_STYLE = MOAITextStyle.new()
+DEFAULT_STYLE:setFont(DEFAULT_FONT)
+DEFAULT_STYLE:setSize(24)
+--
+-- END FONTS AND STYLES
+--------------------------------------------------------------------
+
 
 
 TerrainBody = _G.world:addBody(MOAIBox2DBody.STATIC)
@@ -94,4 +120,9 @@ else
 		end
 	end
 	)
+end
+
+function round(number, decimal)
+	local multiplier = 10^(decimal or 0)
+	return math.floor(number * multiplier + 0.5) / multiplier
 end

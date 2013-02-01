@@ -45,13 +45,13 @@ function _O.rectangle(w, h, y)
 	kbody.shape = shape
 	kbody.halo = halo
 
-	_G.activeTerrainBoxes[kbody] = true
+	game.activeObjects[kbody] = true
 
 	kbody.destroyAt = -_G.screenWidth/2 - _G.screenWidth - posX - w/2 - 10
 end
 
 function _O.coin(y)
-	local w, h = 20, 20
+	local w, h = 16, 16
 	posX = _G.screenWidth/2
 	if not y then
 		posY = math.random(-_G.screenHeight/2 + 10, _G.screenHeight/2 - 10 - h)
@@ -95,7 +95,7 @@ function _O.coin(y)
 	kbody.shape = shape
 	kbody.halo = halo
 
-	_G.activeTerrainBoxes[kbody] = true
+	game.activeObjects[kbody] = true
 
 	kbody.destroyAt = -_G.screenWidth/2 - _G.screenWidth - posX - w/2 - 10
 end
@@ -113,7 +113,7 @@ function _O.coinCollision(event, coin, player)
 end
 
 function _O.beginCoinCollision(coin, player)
-	_G.activeTerrainBoxes[coin:getBody()] = nil
+	game.activeObjects[coin:getBody()] = nil
 	_G.gameLayer:removeProp(coin:getBody().shape)
 	_G.gameLayer:removeProp(coin:getBody().halo)
 	coin:getBody():destroy()

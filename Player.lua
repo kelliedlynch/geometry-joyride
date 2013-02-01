@@ -2,6 +2,10 @@ local _P = {}
 
 _P.__index = _P
 
+_P.STARTING_SPEED = -100
+_P.MAX_SPEED = -400
+_P.SPRITE_SIZE = 24
+
 function _P.new(r)
 	local player = {}
 	setmetatable(player, _P)
@@ -14,11 +18,10 @@ function _P.new(r)
 	fixture:setDensity(1)
 	fixture:setFilter(FILTER_PLAYER)
 	fixture:setCollisionHandler(player.onCollision, MOAIBox2DArbiter.ALL)
-	-- fixture:setCollisionHandler(player.onFriendlyCollision, MOAIBox2DArbiter.ALL, FILTER_FRIENDLY_OBJECT)
-	-- fixture:setCollisionHandler(player.onDeadlyCollision, MOAIBox2DArbiter.ALL, bit32.bor(FILTER_FRIENDLY_OBJECT, FILTER_DEADLY_OBJECT))
 	player.shape:setParent(body)
 	body:resetMassData()
 	player.body = body
+	player.speed = _P.STARTING_SPEED
 
 	return player
 end
@@ -56,19 +59,9 @@ function _P:drawSprite(r, startX)
 	self.halo = halo
 end
 
--- function _P.onFriendlyCollision(event, player, object)
--- 	print("friendly collision")
--- end
-
 function _P.onCollision(event, player, obstacle)
-	if obstacle:getFilter() == FILTER_DEADLY_OBJECT then
-		print("deadly collision")
-	elseif obstacle:getFilter() == FILTER_FRIENDLY_OBJECT then
-		print("friendly collision")
-	end
 	if event == MOAIBox2DArbiter.BEGIN then
 		if obstacle:getFilter() == FILTER_DEADLY_OBJECT then
-			print("deadly collision")
 			_G.game.player.beginDeadlyCollision(_G.game.player, player, obstacle)
 		elseif obstacle:getFilter() == FILTER_FRIENDLY_OBJECT then
 			print("friendly collision")
@@ -82,28 +75,25 @@ end
 function _P:beginDeadlyCollision(player, obstacle)
 	print("begin deadly collision")
 	self:destroy()
-	stopAction()
+	_G.game:stopScrolling()
 	_G.game.thread:stop()
 	local thread = MOAICoroutine.new()
 	thread:run(
 		function()
 			while not sparkSystem:isIdle() do
 				coroutine.yield()
-				--MOAICoroutine.blockOnAction(sparkSystem)
-				
 			end
 			print("done exploding")
-			for body, v in pairs(activeTerrainBoxes) do
+			for body, v in pairs(_G.game.activeObjects) do
 				_G.gameLayer:removeProp(body.shape)
 				_G.gameLayer:removeProp(body.halo)
 				body:destroy()
-				activeTerrainBoxes[body] = nil
+				_G.game.activeObjects[body] = nil
 			end
-			--_G.player = nil
+			_G.hudLayer:removeProp(_G.game.distanceDisplay)
 			_G.game = _G.game.begin()
 		end
 		)
-
 end
 
 function _P:destroy()
@@ -115,12 +105,6 @@ function _P:destroy()
 	self.halo = nil
 	self.body:destroy()
 	self.body = nil
-end
-
-function stopAction()
-	for body, v in pairs(activeTerrainBoxes) do
-		body:setLinearVelocity(0,0)
-	end
 end
 
 function _P:explode()

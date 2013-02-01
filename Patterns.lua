@@ -1,25 +1,55 @@
 local _P = {}
-
--- each pattern can occur at variable y-positions
--- x and y are the position of the shape within the pattern
-
--- rectangle(width, height, y, time)
+-- rectangle(width, height, y)
+-- coin(y)
 -- time, action, params
-_P[1] = {
-	[1] = {
-		time = 1,
-		action = "coin",
-		params = {65, 65, -100},
-	},
-	[2] = {
-		time = 3,
-		action = "rectangle",
-		params = {100, 30, 100},
-	},
-	[3] = {
-		time = 5,
-		action = "rectangle",
-		params = {50, 60, -40},
+
+
+_P = {
+	--------------------------------------------------------------------
+	-- LEVEL ONE PATTERNS
+	--------------------------------------------------------------------
+	level1 = {
+		[1] = {
+			[1] = {
+				time = 1,
+				action = "rectangle",
+				params = {100, 30, 100},
+			},
+			[2] = {
+				time = 2,
+				action = "rectangle",
+				params = {50, 60, -40},
+			},
+		},
+		[2] = {
+			[1] = {
+				time = 1,
+				action = "coin",
+				params = {-100},
+			},
+			[2] = {
+				time = 1.15,
+				action = "coin",
+				params = {-100},
+			},
+			[3] = {
+				time = 1.3,
+				action = "coin",
+				params = {-100},
+			},
+		},
+		[3] = {
+			[1] = {
+				time = 1,
+				action = "coin",
+				params = {100},
+			},
+			[2] = {
+				time = 2,
+				action = "coin",
+				params = {100},
+			},
+		},
 	},
 }
 

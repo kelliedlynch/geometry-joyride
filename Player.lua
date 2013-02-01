@@ -21,7 +21,7 @@ function _P.new(r)
 	player.shape:setParent(body)
 	body:resetMassData()
 	player.body = body
-	player.speed = _P.STARTING_SPEED
+	player.coins = 0
 
 	return player
 end
@@ -32,6 +32,11 @@ function _P:isAlive()
 	else
 		return false
 	end
+end
+
+function _P:getStartSpeed()
+	self.speed = _P.STARTING_SPEED
+	return self.speed
 end
 
 function _P:drawSprite(r, startX)
@@ -90,7 +95,7 @@ function _P:beginDeadlyCollision(player, obstacle)
 				body:destroy()
 				_G.game.activeObjects[body] = nil
 			end
-			_G.hudLayer:removeProp(_G.game.distanceDisplay)
+			_G.game:endGame()
 			_G.game = _G.game.begin()
 		end
 		)

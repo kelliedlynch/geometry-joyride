@@ -124,5 +124,5 @@ end
 
 function round(number, decimal)
 	local multiplier = 10^(decimal or 0)
-	return math.floor(number * multiplier + 0.5) / multiplier
+	return math.floor(number * multiplier + .5) / multiplier
 end

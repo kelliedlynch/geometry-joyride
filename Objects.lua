@@ -48,6 +48,8 @@ function _O.rectangle(w, h, y)
 	game.activeObjects[kbody] = true
 
 	kbody.destroyAt = -_G.screenWidth/2 - _G.screenWidth - posX - w/2 - 10
+
+	return kbody
 end
 
 function _O.coin(y)
@@ -98,6 +100,13 @@ function _O.coin(y)
 	game.activeObjects[kbody] = true
 
 	kbody.destroyAt = -_G.screenWidth/2 - _G.screenWidth - posX - w/2 - 10
+
+	return kbody
+end
+
+function _O:setXPos(object, offset)
+	object:setTransform(offset, 0)
+	object.destroyAt = object.destroyAt - offset
 end
 
 function _O.onCollision()
@@ -105,18 +114,34 @@ function _O.onCollision()
 end
 
 function _O.coinCollision(event, coin, player)
-	print("object collision")
+	print("coin collision", event)
+	print("end", MOAIBox2DArbiter.END)
+	print("pre", MOAIBox2DArbiter.PRE_SOLVE)
+	print("post", MOAIBox2DArbiter.POST_SOLVE)
 	if event == MOAIBox2DArbiter.BEGIN then _O.beginCoinCollision(coin, player) end
-	if event == MOAIBox2DArbiter.END then  end
-	if event == MOAIBox2DArbiter.PRE_SOLVE then  end
-	if event == MOAIBox2DArbiter.POST_SOLVE then  end
+	if event == MOAIBox2DArbiter.END then _O.endCoinCollision(coin, player) end
+	if event == MOAIBox2DArbiter.PRE_SOLVE then print("pre")  end
+	--if event == MOAIBox2DArbiter.POST_SOLVE then  end
 end
 
 function _O.beginCoinCollision(coin, player)
-	game.activeObjects[coin:getBody()] = nil
+	print("begin coin collision")
+	print("fixtures", coin, player)
+	_G.game.activeObjects[coin:getBody()] = nil
 	_G.gameLayer:removeProp(coin:getBody().shape)
 	_G.gameLayer:removeProp(coin:getBody().halo)
 	coin:getBody():destroy()
+	if not _G.game.coinsCollectedThisPattern[coin] then
+		_G.game.coinsCollectedThisPattern[coin] = 1
+	end
+end
+
+function _O.endCoinCollision(coin, player)
+	-- game.activeObjects[coin:getBody()] = nil
+	-- _G.gameLayer:removeProp(coin:getBody().shape)
+	-- _G.gameLayer:removeProp(coin:getBody().halo)
+	-- coin:getBody():destroy()
+	-- _G.game.player.coins = _G.game.player.coins + 1
 end
 
 return _O

@@ -28,12 +28,12 @@ _P = {
 				params = {-100},
 			},
 			[2] = {
-				time = 1.15,
+				time = 1.3,
 				action = "coin",
 				params = {-100},
 			},
 			[3] = {
-				time = 1.3,
+				time = 1.6,
 				action = "coin",
 				params = {-100},
 			},

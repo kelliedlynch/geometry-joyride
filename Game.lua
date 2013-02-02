@@ -13,6 +13,7 @@ function _L.begin(pattern)
 
 	game.objects = require "Objects"
 	game.patterns = require "Patterns"
+	Enemy = require "Enemy"
 	game.activeObjects = {}
 	game.coinsCollectedThisPattern = {}
 
@@ -30,22 +31,29 @@ function _L:scroll(pattern)
 	local speed = self.player:getStartSpeed()
 	local speedFrames = 0
 	local framesUntilNextPattern = self.PATTERN_DELAY
-	if not pattern then pattern = math.random(1, #self.patterns.level1) end
+	if not pattern then pattern = #self.patterns.level1 end
 	while game.player:isAlive() do
 		coroutine.yield()
 		if framesUntilNextPattern == 0 then
 			-- render entire pattern off-screen
+			local framesInCurrentPattern = 0
+			local patternWidth = 0
 			for k, item in pairs(self.patterns.level1[pattern]) do
 				local time, obj, params = item.time, item.action, item.params
+				print(unpack(params))
 				local body = self.objects[item.action](unpack(item.params))
 
 				local xPos = 0
-				local offset = math.abs((game.player.speed * item.time))
+				local offset = math.abs((self.player.speed * item.time))
 				xPos = _G.screenWidth/2 + offset
 				self.objects:setXPos(body, xPos)
+				if offset + body.width > patternWidth then
+					patternWidth = offset + body.width
+				end
 			end
+			framesInCurrentPattern = (patternWidth / math.abs(self.player.speed)) * FRAME_RATE
 			pattern = math.random(1, #self.patterns.level1)
-			framesUntilNextPattern = self.PATTERN_DELAY
+			framesUntilNextPattern = math.floor(self.PATTERN_DELAY + framesInCurrentPattern)
 		else
 			framesUntilNextPattern = framesUntilNextPattern - 1
 		end
@@ -101,7 +109,7 @@ function _L:displayHUD()
 	_G.hudLayer:insertProp(self.distanceCounter)
 
 	self.coinCounter = MOAITextBox.new()
-	self.coinCounter:setString("0.0")
+	self.coinCounter:setString("0")
 	self.coinCounter:setRect(-240, -160, -160, -130)
 	self.coinCounter:setStyle(DEFAULT_STYLE)
 	self.coinCounter:setAlignment(MOAITextBox.CENTER_JUSTIFY, MOAITextBox.CENTER_JUSTIFY)

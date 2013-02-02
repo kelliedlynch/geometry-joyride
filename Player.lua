@@ -42,7 +42,7 @@ end
 function _P:drawSprite(r, startX)
 	print("drawing sprite", startX, r)
 	local gfxQuad1 = MOAIGfxQuad2D.new()
-	gfxQuad1:setTexture("Resources/Images/circleglow.png")
+	gfxQuad1:setTexture("Resources/Images/circle1glow.png")
 	gfxQuad1:setRect (startX-r, -r, startX+r, r )
 
 	local halo = MOAIProp2D.new()
@@ -51,12 +51,12 @@ function _P:drawSprite(r, startX)
 	_G.gameLayer:insertProp(halo)
 
 	local gfxQuad2 = MOAIGfxQuad2D.new()
-	gfxQuad2:setTexture("Resources/Images/circletex.png")
+	gfxQuad2:setTexture("Resources/Images/circle1tex.png")
 	gfxQuad2:setRect(startX-r, -r, startX + r, r)
 
 	local shape = MOAIProp2D.new()
 	shape:setDeck(gfxQuad2)
-	shape:setColor(.5, .5, 1, 1)
+	shape:setColor(.7, .7, 1, 1)
 	_G.gameLayer:insertProp(shape)
 
 	halo:setParent(shape)

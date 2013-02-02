@@ -1,10 +1,13 @@
+require "Util"
+
+FRAME_RATE = 60
 -- Create the window
 local deviceHeight = MOAIEnvironment.horizontalResolution
 local deviceWidth = MOAIEnvironment.verticalResolution
 if deviceWidth == nil then deviceWidth = 480 end
 if deviceHeight == nil then deviceHeight = 320 end
 MOAISim.openWindow("Geometry Joyride", deviceWidth, deviceHeight)
-MOAISim.setStep(1/60)
+MOAISim.setStep(1/FRAME_RATE)
 
 viewport = MOAIViewport.new()
 viewport:setSize(deviceWidth, deviceHeight)
@@ -25,7 +28,7 @@ MOAISim.pushRenderPass(_G.hudLayer)
 --------------------------------------------------------------------
 
 _G.world = MOAIBox2DWorld.new()
-_G.world:setGravity(0, -6)
+_G.world:setGravity(0, -9)
 _G.world:setUnitsToMeters(1/50)
 _G.world:setDebugDrawEnabled(0)
 _G.world:start()
@@ -68,6 +71,7 @@ local right = TerrainBody:addChain({levelWidth/2, -levelHeight/2, levelWidth/2, 
 local ceiling = TerrainBody:addChain({-levelWidth/2, levelHeight/2, levelWidth/2, levelHeight/2})
 local floor = TerrainBody:addChain({-levelWidth/2, -levelHeight/2, levelWidth/2, -levelHeight/2})
 
+require "GeomObject"
 
 Game = require "Game"
 _G.game = Game.begin()
@@ -81,7 +85,7 @@ function yield()
 	while touchDown do
 		if _G.game.player.body then
 			x,y = _G.game.player.shape:getLoc()
-			_G.game.player.body:applyForce(0, 1000000)
+			_G.game.player.body:applyForce(0, 2000000)
 		end
 		coroutine.yield()
 	end
@@ -120,9 +124,4 @@ else
 		end
 	end
 	)
-end
-
-function round(number, decimal)
-	local multiplier = 10^(decimal or 0)
-	return math.floor(number * multiplier + .5) / multiplier
 end

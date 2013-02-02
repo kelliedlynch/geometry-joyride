@@ -1,6 +1,7 @@
 local _O = {}
 
 function _O.rectangle(w, h, y)
+	local rect = GeomRectangle:new()
 	if not w then
 		local junk = math.random()
 		w = math.random(80, 130)
@@ -13,14 +14,13 @@ function _O.rectangle(w, h, y)
 	else
 		posY = y
 	end
-	print("x,y, w,h", posX, posY, w, h)
 
 	local kbody = _G.world:addBody(MOAIBox2DBody.KINEMATIC)
 	local kfix = kbody:addRect(posX, posY, posX + w, posY + h)
 	kfix:setFilter(FILTER_DEADLY_OBJECT)
-	kfix:setCollisionHandler(_O.onCollision, MOAIBox2DArbiter.ALL, FILTER_PLAYER)
+	--kfix:setCollisionHandler(_O.onCollision, MOAIBox2DArbiter.ALL, FILTER_PLAYER)
 	kbody:resetMassData()
-	kbody:setLinearVelocity(_G.speed, 0)
+	kbody:setLinearVelocity(_G.game.player.speed, 0)
 
 	local gfxQuad1 = MOAIGfxQuad2D.new()
 	gfxQuad1:setTexture("Resources/Images/rectglow.png")
@@ -44,6 +44,7 @@ function _O.rectangle(w, h, y)
 	shape:setParent(kbody)
 	kbody.shape = shape
 	kbody.halo = halo
+	kbody.width, kbody.height = w, h
 
 	game.activeObjects[kbody] = true
 
@@ -72,7 +73,7 @@ function _O.coin(y)
 	kfix:setCollisionHandler(_O.coinCollision, MOAIBox2DArbiter.ALL, FILTER_PLAYER)
 	kfix:setSensor(true)
 	kbody:resetMassData()
-	kbody:setLinearVelocity(_G.speed, 0)
+	kbody:setLinearVelocity(_G.game.player.speed, 0)
 
 	local gfxQuad1 = MOAIGfxQuad2D.new()
 	gfxQuad1:setTexture("Resources/Images/triglow.png")
@@ -96,6 +97,7 @@ function _O.coin(y)
 	shape:setParent(kbody)
 	kbody.shape = shape
 	kbody.halo = halo
+	kbody.width, kbody.height = w, h
 
 	game.activeObjects[kbody] = true
 
@@ -114,14 +116,8 @@ function _O.onCollision()
 end
 
 function _O.coinCollision(event, coin, player)
-	print("coin collision", event)
-	print("end", MOAIBox2DArbiter.END)
-	print("pre", MOAIBox2DArbiter.PRE_SOLVE)
-	print("post", MOAIBox2DArbiter.POST_SOLVE)
 	if event == MOAIBox2DArbiter.BEGIN then _O.beginCoinCollision(coin, player) end
 	if event == MOAIBox2DArbiter.END then _O.endCoinCollision(coin, player) end
-	if event == MOAIBox2DArbiter.PRE_SOLVE then print("pre")  end
-	--if event == MOAIBox2DArbiter.POST_SOLVE then  end
 end
 
 function _O.beginCoinCollision(coin, player)
@@ -137,11 +133,13 @@ function _O.beginCoinCollision(coin, player)
 end
 
 function _O.endCoinCollision(coin, player)
-	-- game.activeObjects[coin:getBody()] = nil
-	-- _G.gameLayer:removeProp(coin:getBody().shape)
-	-- _G.gameLayer:removeProp(coin:getBody().halo)
-	-- coin:getBody():destroy()
-	-- _G.game.player.coins = _G.game.player.coins + 1
+
+end
+
+function _O.enemy()
+	local enemy = Enemy.new(24)
+	print("enemy.body", enemy.body)
+	return enemy.body
 end
 
 return _O

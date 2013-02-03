@@ -1,8 +1,20 @@
 GeomRectangle = inheritsFrom(GeomObject)
+GeomRectangle.DEFAULT_WIDTH = 16
+GeomRectangle.DEFAULT_HEIGHT = 16
+GeomRectangle.DEFAULT_COLOR = {.2, 1, .4, 1}
+GeomRectangle.DEFAULT_HALO_TEXTURE = "Resources/Images/rectglow.png"
+GeomRectangle.DEFAULT_SHAPE_TEXTURE = "Resources/Images/recttex.png"
 
-function GeomRectangle:new(w, h, y)
-	print("creating new rectangle")
-	local newInstance = self:init()
+function GeomRectangle:constructor(w, h, y)
+	print("w", w)
+	GeomObject.constructor(self, w, h, 0, y)
 
-	return newInstance
+	local kfix = self.body:addRect(self.posX, self.posY, self.posX + w, self.posY + h)
+	kfix:setFilter(FILTER_DEADLY_OBJECT)
+	self.body:resetMassData()
+	self:setSpeed(_G.game.player.speed)
+
+	self:renderSprite()
+
+	return self
 end

@@ -23,6 +23,8 @@ function _L.begin(pattern)
 	game.thread:run(game.scroll, game)
 	game.thread:attach(_G.world)
 
+	Dispatch.registerEvent("onPlayerDestroyed", game)
+
 	return game
 end
 
@@ -32,25 +34,10 @@ function _L:scroll(pattern)
 	local speedFrames = 0
 	local framesUntilNextPattern = self.PATTERN_DELAY
 	if not pattern then pattern = #self.patterns.level1 end
-	while game.player:isAlive() do
+	while self.player:isAlive() do
 		coroutine.yield()
 		if framesUntilNextPattern == 0 then
-			-- render entire pattern off-screen
-			local framesInCurrentPattern = 0
-			local patternWidth = 0
-			for k, item in pairs(self.patterns.level1[pattern]) do
-				local time, obj, params = item.time, item.action, item.params
-				print(unpack(params))
-				local body = self.objects[item.action](unpack(item.params))
-
-				local xPos = 0
-				local offset = math.abs((self.player.speed * item.time))
-				xPos = _G.screenWidth/2 + offset
-				self.objects:setXPos(body, xPos)
-				if offset + body.width > patternWidth then
-					patternWidth = offset + body.width
-				end
-			end
+			local patternWidth = self:renderPattern(pattern)
 			framesInCurrentPattern = (patternWidth / math.abs(self.player.speed)) * FRAME_RATE
 			pattern = math.random(1, #self.patterns.level1)
 			framesUntilNextPattern = math.floor(self.PATTERN_DELAY + framesInCurrentPattern)
@@ -58,7 +45,7 @@ function _L:scroll(pattern)
 			framesUntilNextPattern = framesUntilNextPattern - 1
 		end
 
-		if speed >= self.player.MAX_SPEED then 
+		if speed > self.player.MAX_SPEED then 
 			speed = speed - .2
 			if speed < self.player.MAX_SPEED then
 				speed = self.player.MAX_SPEED
@@ -66,19 +53,10 @@ function _L:scroll(pattern)
 			self.player.speed = speed
 		end
 		speedFrames = speedFrames + 1
-		for body, v in pairs(self.activeObjects) do
-			if speedFrames >= 60 then
-				body:setLinearVelocity(speed, 0)
-			end
-			local x, y = body:getPosition()
-			if x <= body.destroyAt then
-				body:destroy()
-				_G.gameLayer:removeProp(body.shape)
-				_G.gameLayer:removeProp(body.halo)
-				self.activeObjects[body] = nil
-			end
+		if speedFrames >= 60 then 
+			Dispatch.triggerEvent("onUpdateSpeed")
+			speedFrames = 0
 		end
-		if speedFrames >= 60 then speedFrames = 0 end
 		totalFrames = totalFrames + 1
 		if totalFrames % 10 == 0 then
 			local distanceTraveled = math.abs(totalFrames *(self.player.speed / 10000))
@@ -86,16 +64,29 @@ function _L:scroll(pattern)
 			self.player.currentDistance = distanceTraveled
 			self:updateHUD()
 		end
-		for fix, coins in pairs(self.coinsCollectedThisPattern) do
-			self.player.coins = self.player.coins + coins
-			self.coinsCollectedThisPattern[fix] = 0
-		end
 	end
 end
 
+function _L:renderPattern(pattern)
+	local patternWidth = 0
+	for k, item in pairs(self.patterns.level1[pattern]) do
+		print("game", self)
+		local obj = _G[item.action].new(unpack(item.params))
+
+		local xPos = 0
+		local offset = math.abs((self.player.speed * item.time))
+		xPos = _G.screenWidth/2 + offset
+		obj:setPosition(xPos, 0)
+		if offset + obj.body.width > patternWidth then
+			patternWidth = offset + obj.body.width
+		end
+	end
+	return patternWidth
+end
+
 function _L:stopScrolling()
-	for body, v in pairs(self.activeObjects) do
-		body:setLinearVelocity(0,0)
+	for obj, v in pairs(self.activeObjects) do
+		obj:setSpeed(0)
 	end
 end
 
@@ -115,11 +106,14 @@ function _L:displayHUD()
 	self.coinCounter:setAlignment(MOAITextBox.CENTER_JUSTIFY, MOAITextBox.CENTER_JUSTIFY)
 	self.coinCounter:setYFlip(true)
 	_G.hudLayer:insertProp(self.coinCounter)
+
+	function self.coinCounter:update(value)
+		self:setString(""..value)
+	end
 end
 
 function _L:updateHUD()
 	local dist = self.player.currentDistance
-	--local coins = self.player.coins
 	local dstr
 	if math.floor(dist) == dist then
 		dstr = dist..".0"
@@ -127,13 +121,21 @@ function _L:updateHUD()
 		dstr = dist..""
 	end
 	self.distanceCounter:setString(""..dstr)
-	self.coinCounter:setString(""..self.player.coins)
 end
 
 function _L:endGame()
 	_G.hudLayer:removeProp(self.distanceCounter)
 	_G.hudLayer:removeProp(self.coinCounter)
 	self.player = nil
+	for obj, v in pairs(self.activeObjects) do
+		obj:destroy()
+	end
+end
+
+function _L:___onPlayerDestroyed()
+	self:endGame()
+	Dispatch.removeListener(self)
+	_G.game = Game.begin()
 end
 
 return _L

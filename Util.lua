@@ -13,9 +13,10 @@ function inheritsFrom( baseClass )
 	local new_class = {}
 	local class_mt = { __index = new_class }
 
-	function new_class:init()
+	function new_class.new(...)
 		local newinst = {}
-			setmetatable( newinst, class_mt )
+		setmetatable( newinst, class_mt )
+		newinst:constructor(...)
 		return newinst
 	end
 

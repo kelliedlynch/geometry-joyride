@@ -1,4 +1,6 @@
 require "Util"
+require "EventDispatcher"
+require "GeomObject"
 
 FRAME_RATE = 60
 -- Create the window

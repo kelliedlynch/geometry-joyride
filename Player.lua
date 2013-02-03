@@ -23,6 +23,8 @@ function _P.new(r)
 	player.body = body
 	player.coins = 0
 
+	Dispatch.registerEvent("onCoinCollected", player, true)
+
 	return player
 end
 
@@ -89,14 +91,7 @@ function _P:beginDeadlyCollision(player, obstacle)
 				coroutine.yield()
 			end
 			print("done exploding")
-			for body, v in pairs(_G.game.activeObjects) do
-				_G.gameLayer:removeProp(body.shape)
-				_G.gameLayer:removeProp(body.halo)
-				body:destroy()
-				_G.game.activeObjects[body] = nil
-			end
-			_G.game:endGame()
-			_G.game = _G.game.begin()
+			Dispatch.triggerEvent("onPlayerDestroyed")
 		end
 		)
 end
@@ -215,6 +210,12 @@ function _P:explode()
 	-- sets the system to this state
 	sparkSystem:setState ( 1, sparkState )
 	sparkSystem:surge(128, x, y, 0, 0)
+end
+
+function _P:___onCoinCollected(coin)
+	print("coin, value", coin, coin.value)
+	self.coins = self.coins + coin.value
+	_G.game.coinCounter:update(self.coins)
 end
 
 return _P

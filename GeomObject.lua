@@ -5,19 +5,23 @@
 GeomObject = inheritsFrom()
 
 function GeomObject:constructor(w, h, x, y)
-	self.width, self.height = w, h
-	self.posX = _G.screenWidth/2 + x
-	if not y then
-		self.posY = math.random(-_G.screenHeight/2 + 10, _G.screenHeight/2 - 10 - h)
-	else
+	if x and y then
+		self.posX = x
 		self.posY = y
+	elseif x and not y then
+		self.posX = 0
+		self.posY = x
+	else
+		self.posX = 0
+		self.posY = 0
 	end
+
+	self.width, self.height = w, h
+
 	self.body = _G.world:addBody(MOAIBox2DBody.KINEMATIC)
 	self.body.width, self.body.height = w, h
 	self.destroyAt = -_G.screenWidth/2 - self.posX - w - 10
-	self.body.speed = _G.game.player.speed
 	self.body.object = self
-	_G.game.activeObjects[self] = true
 
 	Dispatch.registerEvent("onUpdateSpeed", self, true)
 
@@ -72,7 +76,9 @@ function GeomObject:___onUpdateSpeed()
 end
 
 function GeomObject:destroy()
+	print("destroying object", self)
 	self.thread:stop()
+	self.thread = nil
 	self.body:destroy()
 	_G.gameLayer:removeProp(self.shape)
 	_G.gameLayer:removeProp(self.halo)
@@ -82,3 +88,4 @@ end
 
 require "GeomRectangle"
 require "GeomCoin"
+require "GeomCircle"

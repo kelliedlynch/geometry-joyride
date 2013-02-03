@@ -6,20 +6,19 @@ GeomCoin.DEFAULT_COLOR = {.2, 1, .4, 1}
 GeomCoin.DEFAULT_HALO_TEXTURE = "Resources/Images/triglow.png"
 GeomCoin.DEFAULT_SHAPE_TEXTURE = "Resources/Images/tritex.png"
 
-function GeomCoin:constructor(y)
-	GeomObject.constructor(self, self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, 0, y)
+function GeomCoin:constructor(w, h, x, y)
+	GeomObject.constructor(self, self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, x, y)
 
 	local poly = {
-		self.posX, self.posY,
-		self.posX + self.width, self.posY,
-		self.posX + self.width/2, self.posY + self.height,
+		self.posX + self.width/2, self.posY,
+		self.posX + self.width, self.posY + self.height,
+		self.posX, self.posY + self.height,
 	}
-	local kfix = self.body:addPolygon(poly)
-	kfix:setFilter(FILTER_FRIENDLY_OBJECT)
-	kfix:setCollisionHandler(self.onCoinCollision, MOAIBox2DArbiter.BEGIN, FILTER_PLAYER)
-	kfix:setSensor(true)
+	self.fixture = self.body:addPolygon(poly)
+	self.fixture:setFilter(FILTER_FRIENDLY_OBJECT)
+	self.fixture:setCollisionHandler(self.onCoinCollision, MOAIBox2DArbiter.BEGIN, FILTER_PLAYER)
+	self.fixture:setSensor(true)
 	self.body:resetMassData()
-	self:setSpeed(_G.game.player.speed)
 
 	self:renderSprite()
 

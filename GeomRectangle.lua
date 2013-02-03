@@ -5,14 +5,12 @@ GeomRectangle.DEFAULT_COLOR = {.2, 1, .4, 1}
 GeomRectangle.DEFAULT_HALO_TEXTURE = "Resources/Images/rectglow.png"
 GeomRectangle.DEFAULT_SHAPE_TEXTURE = "Resources/Images/recttex.png"
 
-function GeomRectangle:constructor(w, h, y)
-	print("w", w)
-	GeomObject.constructor(self, w, h, 0, y)
+function GeomRectangle:constructor(w, h, x, y)
+	GeomObject.constructor(self, w, h, x, y)
 
-	local kfix = self.body:addRect(self.posX, self.posY, self.posX + w, self.posY + h)
-	kfix:setFilter(FILTER_DEADLY_OBJECT)
+	self.fixture = self.body:addRect(self.posX, self.posY, self.posX + w, self.posY + h)
+	self.fixture:setFilter(FILTER_DEADLY_OBJECT)
 	self.body:resetMassData()
-	self:setSpeed(_G.game.player.speed)
 
 	self:renderSprite()
 

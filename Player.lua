@@ -1,34 +1,54 @@
-local _P = {}
+Player = inheritsFrom(GeomObject)
+Player.DEFAULT_WIDTH = 48
+Player.DEFAULT_HEIGHT = 48
+Player.DEFAULT_COLOR = {.7, .7, 1, 1}
+Player.DEFAULT_HALO_TEXTURE = "Resources/Images/circle1glow.png"
+Player.DEFAULT_SHAPE_TEXTURE = "Resources/Images/circle1tex.png"
+Player.STARTING_SPEED = -600
+Player.MAX_SPEED = -600
 
-_P.__index = _P
+function Player:constructor(w, h, x, y)
+	print("creating player with params", self, self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, -_G.screenWidth/2 + _G.screenWidth/5, -self.DEFAULT_HEIGHT/2)
+	local w, h, x, y = self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, -_G.screenWidth/2 + _G.screenWidth/5, -self.DEFAULT_HEIGHT/2
+	GeomObject.constructor(self, w, h, x, y)
 
-_P.STARTING_SPEED = -100
-_P.MAX_SPEED = -400
-_P.SPRITE_SIZE = 24
+	self.body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
+	self.body:setFixedRotation(true)
+	self.fixture = self.body:addCircle(x + w/2, 0, w/2)
+	self.fixture:setDensity(1)
+	self.fixture:setFilter(FILTER_PLAYER)
+	self.fixture:setCollisionHandler(self.onCollision, MOAIBox2DArbiter.ALL)
+	self.body:resetMassData()
+	self:renderSprite()
 
-function _P.new(r)
-	local player = {}
-	setmetatable(player, _P)
-	local startX = -_G.screenWidth/2 + _G.screenWidth/5
-	player:drawSprite(r, startX)
+	self.coins = 0
 
-	local body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
-	body:setFixedRotation(true)
-	local fixture = body:addCircle(startX, 0, r)
-	fixture:setDensity(1)
-	fixture:setFilter(FILTER_PLAYER)
-	fixture:setCollisionHandler(player.onCollision, MOAIBox2DArbiter.ALL)
-	player.shape:setParent(body)
-	body:resetMassData()
-	player.body = body
-	player.coins = 0
+	Dispatch.registerEvent("onCoinCollected", self, true)
 
-	Dispatch.registerEvent("onCoinCollected", player, true)
-
-	return player
+	return self
 end
 
-function _P:isAlive()
+function Player:animate()
+
+end
+
+function Player:accelerate(value)
+	if not self.speed then self.speed = self.STARTING_SPEED end
+	if not value then value = .2 end
+	if self.speed > self.MAX_SPEED then
+		self.speed = self.speed - value
+		Dispatch.triggerEvent("onUpdateSpeed")
+	elseif self.speed < self.MAX_SPEED then
+		self.speed = self.MAX_SPEED
+		Dispatch.triggerEvent("onUpdateSpeed")
+	end
+end
+
+function Player:___onUpdateSpeed()
+	--self.speed = speed
+end
+
+function Player:isAlive()
 	if self.body then
 		return true
 	else
@@ -36,37 +56,12 @@ function _P:isAlive()
 	end
 end
 
-function _P:getStartSpeed()
-	self.speed = _P.STARTING_SPEED
+function Player:getStartSpeed()
+	self.speed = Player.STARTING_SPEED
 	return self.speed
 end
 
-function _P:drawSprite(r, startX)
-	print("drawing sprite", startX, r)
-	local gfxQuad1 = MOAIGfxQuad2D.new()
-	gfxQuad1:setTexture("Resources/Images/circle1glow.png")
-	gfxQuad1:setRect (startX-r, -r, startX+r, r )
-
-	local halo = MOAIProp2D.new()
-	halo:setDeck(gfxQuad1)
-	halo:setColor(.8, .8, 1, 1)
-	_G.gameLayer:insertProp(halo)
-
-	local gfxQuad2 = MOAIGfxQuad2D.new()
-	gfxQuad2:setTexture("Resources/Images/circle1tex.png")
-	gfxQuad2:setRect(startX-r, -r, startX + r, r)
-
-	local shape = MOAIProp2D.new()
-	shape:setDeck(gfxQuad2)
-	shape:setColor(.7, .7, 1, 1)
-	_G.gameLayer:insertProp(shape)
-
-	halo:setParent(shape)
-	self.shape = shape
-	self.halo = halo
-end
-
-function _P.onCollision(event, player, obstacle)
+function Player.onCollision(event, player, obstacle)
 	if event == MOAIBox2DArbiter.BEGIN then
 		if obstacle:getFilter() == FILTER_DEADLY_OBJECT then
 			_G.game.player.beginDeadlyCollision(_G.game.player, player, obstacle)
@@ -79,7 +74,7 @@ function _P.onCollision(event, player, obstacle)
 	if event == MOAIBox2DArbiter.POST_SOLVE then  end
 end
 
-function _P:beginDeadlyCollision(player, obstacle)
+function Player:beginDeadlyCollision(player, obstacle)
 	print("begin deadly collision")
 	self:destroy()
 	_G.game:stopScrolling()
@@ -96,7 +91,7 @@ function _P:beginDeadlyCollision(player, obstacle)
 		)
 end
 
-function _P:destroy()
+function Player:destroy()
 	print("destroying")
 	self:explode()
 	_G.gameLayer:removeProp(self.shape)
@@ -107,7 +102,7 @@ function _P:destroy()
 	self.body = nil
 end
 
-function _P:explode()
+function Player:explode()
 	local x, y = self.body:getWorldCenter()
 	print("explode", x, y)
 	local texture = MOAIImageTexture.new()
@@ -212,10 +207,10 @@ function _P:explode()
 	sparkSystem:surge(128, x, y, 0, 0)
 end
 
-function _P:___onCoinCollected(coin)
+function Player:___onCoinCollected(coin)
 	print("coin, value", coin, coin.value)
 	self.coins = self.coins + coin.value
 	_G.game.coinCounter:update(self.coins)
 end
 
-return _P
+return Player

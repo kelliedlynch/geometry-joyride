@@ -32,7 +32,7 @@ MOAISim.pushRenderPass(_G.hudLayer)
 _G.world = MOAIBox2DWorld.new()
 _G.world:setGravity(0, -9)
 _G.world:setUnitsToMeters(1/50)
-_G.world:setDebugDrawEnabled(0)
+_G.world:setDebugDrawEnabled(true)
 _G.world:start()
 _G.gameLayer:setBox2DWorld(_G.world)
 

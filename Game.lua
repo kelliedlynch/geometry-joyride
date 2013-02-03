@@ -9,9 +9,8 @@ function _L.begin(pattern)
 	setmetatable(game, _L)
 
 	Player = require "Player"
-	game.player = Player.new(24)
+	game.player = Player.new()
 
-	game.objects = require "Objects"
 	game.patterns = require "Patterns"
 	Enemy = require "Enemy"
 	game.activeObjects = {}
@@ -30,10 +29,10 @@ end
 
 function _L:scroll(pattern)
 	local totalFrames = 0
-	local speed = self.player:getStartSpeed()
-	local speedFrames = 0
+
 	local framesUntilNextPattern = self.PATTERN_DELAY
 	if not pattern then pattern = #self.patterns.level1 end
+	i = 1
 	while self.player:isAlive() do
 		coroutine.yield()
 		if framesUntilNextPattern == 0 then
@@ -41,22 +40,13 @@ function _L:scroll(pattern)
 			framesInCurrentPattern = (patternWidth / math.abs(self.player.speed)) * FRAME_RATE
 			pattern = math.random(1, #self.patterns.level1)
 			framesUntilNextPattern = math.floor(self.PATTERN_DELAY + framesInCurrentPattern)
-		else
+		elseif framesUntilNextPattern > 0 then
 			framesUntilNextPattern = framesUntilNextPattern - 1
+		else
+			print("frames less than zero")
 		end
+		self.player:accelerate()
 
-		if speed > self.player.MAX_SPEED then 
-			speed = speed - .2
-			if speed < self.player.MAX_SPEED then
-				speed = self.player.MAX_SPEED
-			end
-			self.player.speed = speed
-		end
-		speedFrames = speedFrames + 1
-		if speedFrames >= 60 then 
-			Dispatch.triggerEvent("onUpdateSpeed")
-			speedFrames = 0
-		end
 		totalFrames = totalFrames + 1
 		if totalFrames % 10 == 0 then
 			local distanceTraveled = math.abs(totalFrames *(self.player.speed / 10000))
@@ -70,17 +60,32 @@ end
 function _L:renderPattern(pattern)
 	local patternWidth = 0
 	for k, item in pairs(self.patterns.level1[pattern]) do
-		print("game", self)
-		local obj = _G[item.action].new(unpack(item.params))
-
-		local xPos = 0
+		local w, h, x, y = unpack(item.params)
 		local offset = math.abs((self.player.speed * item.time))
-		xPos = _G.screenWidth/2 + offset
-		obj:setPosition(xPos, 0)
+		if x and y then
+			x = x
+			y = y
+		elseif x and not y then
+			y = x
+			x = _G.screenWidth/2 + offset
+		elseif w and h then
+			x = 0
+			y = 0
+		elseif w then
+			x = _G.screenWidth/2 + offset
+			y = w
+			w = nil
+			h = nil
+		end
+		local obj = _G[item.action].new(w, h, x, y)
+		self.activeObjects[obj] = true
+
+
 		if offset + obj.body.width > patternWidth then
 			patternWidth = offset + obj.body.width
 		end
 	end
+	Dispatch.triggerEvent("onUpdateSpeed")
 	return patternWidth
 end
 

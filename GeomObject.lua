@@ -29,6 +29,7 @@ function GeomObject:constructor(w, h, x, y)
 
 	self.thread = MOAICoroutine.new()
 	self.thread:run(self.animate, self)
+	if _G.game then	self.thread:attach(_G.game.thread) end
 end
 
 function GeomObject:animate()

@@ -90,7 +90,7 @@ _P = {
 		[5] = {
 			[1] = {
 				time = 0,
-				action = "GeomCircle",
+				action = "GeomEnemy",
 				params = {24, 24, 0},
 			},
 		},

@@ -69,7 +69,7 @@ local levelWidth, levelHeight = 480, 310
 
 -- draw the edges of the screen
 local left = TerrainBody:addChain({-levelWidth/2, -levelHeight/2, -levelWidth/2, levelHeight/2})
-local right = TerrainBody:addChain({levelWidth/2, -levelHeight/2, levelWidth/2, levelHeight/2})
+--local right = TerrainBody:addChain({levelWidth/2, -levelHeight/2, levelWidth/2, levelHeight/2})
 local ceiling = TerrainBody:addChain({-levelWidth/2, levelHeight/2, levelWidth/2, levelHeight/2})
 local floor = TerrainBody:addChain({-levelWidth/2, -levelHeight/2, levelWidth/2, -levelHeight/2})
 

@@ -8,7 +8,7 @@ GeomRectangle.DEFAULT_SHAPE_TEXTURE = "Resources/Images/recttex.png"
 function GeomRectangle:constructor(w, h, x, y)
 	GeomObject.constructor(self, w, h, x, y)
 
-	self.fixture = self.body:addRect(self.posX, self.posY, self.posX + w, self.posY + h)
+	self.fixture = self.body:addRect(0, 0, w, h)
 	self.fixture:setFilter(FILTER_DEADLY_OBJECT)
 	self.body:resetMassData()
 

@@ -10,9 +10,9 @@ function GeomCoin:constructor(w, h, x, y)
 	GeomObject.constructor(self, self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, x, y)
 
 	local poly = {
-		self.posX + self.width/2, self.posY,
-		self.posX + self.width, self.posY + self.height,
-		self.posX, self.posY + self.height,
+		self.width/2, 0,
+		self.width, self.height,
+		0, self.height,
 	}
 	self.fixture = self.body:addPolygon(poly)
 	self.fixture:setFilter(FILTER_FRIENDLY_OBJECT)

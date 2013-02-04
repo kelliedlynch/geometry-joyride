@@ -4,17 +4,19 @@ Player.DEFAULT_HEIGHT = 48
 Player.DEFAULT_COLOR = {.7, .7, 1, 1}
 Player.DEFAULT_HALO_TEXTURE = "Resources/Images/circle1glow.png"
 Player.DEFAULT_SHAPE_TEXTURE = "Resources/Images/circle1tex.png"
-Player.STARTING_SPEED = -600
-Player.MAX_SPEED = -600
+Player.STARTING_SPEED = -100
+Player.MAX_SPEED = -400
 
 function Player:constructor(w, h, x, y)
-	print("creating player with params", self, self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, -_G.screenWidth/2 + _G.screenWidth/5, -self.DEFAULT_HEIGHT/2)
+	
 	local w, h, x, y = self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, -_G.screenWidth/2 + _G.screenWidth/5, -self.DEFAULT_HEIGHT/2
+	print("creating player with params", self, w, h, x, y)
 	GeomObject.constructor(self, w, h, x, y)
 
 	self.body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
 	self.body:setFixedRotation(true)
-	self.fixture = self.body:addCircle(x + w/2, 0, w/2)
+	self.body:setTransform(self.posX, self.posY)
+	self.fixture = self.body:addCircle(w/2, w/2, w/2)
 	self.fixture:setDensity(1)
 	self.fixture:setFilter(FILTER_PLAYER)
 	self.fixture:setCollisionHandler(self.onCollision, MOAIBox2DArbiter.ALL)

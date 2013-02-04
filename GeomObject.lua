@@ -20,6 +20,8 @@ function GeomObject:constructor(w, h, x, y)
 
 	self.body = _G.world:addBody(MOAIBox2DBody.KINEMATIC)
 	self.body.width, self.body.height = w, h
+	print("posX, posY", self.posX, self.posY)
+	self.body:setTransform(self.posX, self.posY)
 	self.destroyAt = -_G.screenWidth/2 - self.posX - w - 10
 	self.body.object = self
 
@@ -39,20 +41,23 @@ end
 function GeomObject:renderSprite()
 	local gfxQuad1 = MOAIGfxQuad2D.new()
 	gfxQuad1:setTexture(self.DEFAULT_HALO_TEXTURE)
-	gfxQuad1:setRect (self.posX, self.posY, self.posX + self.width, self.posY + self.height)
+	print("w, h", self.width, self.height)
+	gfxQuad1:setRect (0, 0, self.width, self.height)
 
 	local halo = MOAIProp2D.new()
 	halo:setDeck(gfxQuad1)
 	halo:setColor(unpack(self.DEFAULT_COLOR))
+	--halo:setLoc(self.posX, self.posY)
 	_G.gameLayer:insertProp(halo)
 
 	local gfxQuad2 = MOAIGfxQuad2D.new()
 	gfxQuad2:setTexture(self.DEFAULT_SHAPE_TEXTURE)
-	gfxQuad2:setRect(self.posX, self.posY, self.posX + self.width, self.posY + self.height)
+	gfxQuad2:setRect(0, 0, self.width, self.height)
 
 	local shape = MOAIProp2D.new()
 	shape:setDeck(gfxQuad2)
 	shape:setColor(unpack(self.DEFAULT_COLOR))
+	--shape:setLoc(self.posX, self.posY)
 	_G.gameLayer:insertProp(shape)
 
 	halo:setParent(shape)
@@ -66,10 +71,10 @@ function GeomObject:setSpeed(speed)
 	self.body.speed = speed
 end
 
-function GeomObject:setPosition(x, y)
-	self.body:setTransform(x, y)
-	self.destroyAt = self.destroyAt - x
-end
+-- function GeomObject:setPosition(x, y)
+-- 	self.body:setTransform(x, y)
+-- 	self.destroyAt = self.destroyAt - x
+-- end
 
 function GeomObject:___onUpdateSpeed()
 	self:setSpeed(_G.game.player.speed)
@@ -89,3 +94,4 @@ end
 require "GeomRectangle"
 require "GeomCoin"
 require "GeomCircle"
+require "GeomEnemy"

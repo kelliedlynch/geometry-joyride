@@ -18,7 +18,7 @@ _P = {
 			[2] = {
 				time = 0,
 				action = "GeomRectangle",
-				params = {100, -30, -60},
+				params = {100, 30, -90},
 			},
 		},
 		[2] = {
@@ -65,29 +65,29 @@ _P = {
 				params = {60},
 			},
 		},
-		-- [4] = {
-		-- 	[1] = {
-		-- 		time = 0,
-		-- 		action = "GeomRectangle",
-		-- 		params = {20, 110, -160},
-		-- 	},
-		-- 	[2] = {
-		-- 		time = 1,
-		-- 		action = "GeomRectangle",
-		-- 		params = {20, 110, 60},
-		-- 	},
-		-- 	[3] = {
-		-- 		time = 2,
-		-- 		action = "GeomRectangle",
-		-- 		params = {20, 110, -160},
-		-- 	},
-		-- 	[4] = {
-		-- 		time = 3,
-		-- 		action = "GeomRectangle",
-		-- 		params = {20, 110, 60},
-		-- 	},
-		-- },
 		[4] = {
+			[1] = {
+				time = 0,
+				action = "GeomRectangle",
+				params = {20, 110, -160},
+			},
+			[2] = {
+				time = 1,
+				action = "GeomRectangle",
+				params = {20, 110, 60},
+			},
+			[3] = {
+				time = 2,
+				action = "GeomRectangle",
+				params = {20, 110, -160},
+			},
+			[4] = {
+				time = 3,
+				action = "GeomRectangle",
+				params = {20, 110, 60},
+			},
+		},
+		[5] = {
 			[1] = {
 				time = 0,
 				action = "GeomCircle",

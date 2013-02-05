@@ -69,8 +69,8 @@ function _L:renderPattern(pattern)
 			y = x
 			x = _G.screenWidth/2 + offset
 		elseif w and h then
-			x = 0
-			y = 0
+			x = _G.screenWidth/2 + offset
+			y = nil
 		elseif w then
 			x = _G.screenWidth/2 + offset
 			y = w

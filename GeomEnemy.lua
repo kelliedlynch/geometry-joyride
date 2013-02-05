@@ -14,6 +14,9 @@ function GeomEnemy:constructor(w, h, x, y)
 	self.body:resetMassData()
 
 	self:renderSprite()
+	print("posX, posY after creation", self.posX, self.posY)
+	print("worldLoc after creation", self.body:getWorldLoc())
+	print("position after creation", self.body:getPosition())
 
 	return self
 end
@@ -23,41 +26,17 @@ function GeomEnemy:animate()
 
 	while self.body:getPosition() > self.destroyAt do 
 		coroutine.yield()
-	if self.curveX then
-		local dx = self.curveLength - (_G.game.player.speed - _G.game.player.STARTING_SPEED)/3
-		print("newLength", dx)
-		self.curveX:setKey(2, .5, self.posX-dx, MOAIEaseType.LINEAR)
-		--i = i+1
-	end		
+		if self.curveX then
+			local dx = self.curveLength - (_G.game.player.speed - _G.game.player.STARTING_SPEED)/2.8
+			self.curveX:setKey(2, .5, self.posX-dx, MOAIEaseType.LINEAR)
+		end		
 	end
 	self:destroy()
 end
 
-function GeomEnemy:setSpeed(speed)
-
-end
-
-function GeomEnemy:___onUpdateSpeed()
-	--self:setSpeed(_G.game.player.speed)
-
-
-end
-
-function GeomEnemy:destroy()
-	GeomObject.destroy(self)
-	self.timer:stop()
-	self.timer = nil
-	self.timer2:stop()
-	self.timer = nil
-end
-
 function GeomEnemy:aniWave(length, amplitude)
-	--i = 1
-	print("animating wave")
-	print("x, y, length, amplitude", self.posX, self.posY, length, amplitude)
 	self.curveLength = length
-	local dx = -(length - (_G.game.player.speed + _G.game.player.STARTING_SPEED)/3)
-	print("starting length", self.curveLength)
+	local dx = -(length - (_G.game.player.speed + _G.game.player.STARTING_SPEED)/2.8)
 	self.curveX = MOAIAnimCurve.new()
 	self.curveX:reserveKeys(2)
 	self.curveX:setKey(1, 0.0, self.posX, MOAIEaseType.LINEAR)
@@ -77,19 +56,30 @@ function GeomEnemy:aniWave(length, amplitude)
 	self.timer:setSpan(0, .5)
 	self.timer:setMode(MOAITimer.CONTINUE)
 
-	--timer:setListener(MOAITimer.EVENT_TIMER_LOOP, applyForce)
-
 	self.timer2 = MOAITimer.new()
 	self.timer2:setSpan(0, .5)
 	self.timer2:setMode(MOAITimer.CONTINUE)
-	print("body location", self.body:getWorldLoc())
 	self.body:setAttrLink(MOAITransform.ATTR_X_LOC, self.curveX, MOAIAnimCurve.ATTR_VALUE)
 	self.body:setAttrLink(MOAITransform.ATTR_Y_LOC, self.curveY, MOAIAnimCurve.ATTR_VALUE)
 	self.curveX:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timer2, MOAITimer.ATTR_TIME)
 	self.curveY:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timer, MOAITimer.ATTR_TIME)
 
-	-- self.timer:start()
-	-- self.timer2:start()
 	self.timer:attach(self.thread)
 	self.timer2:attach(self.thread)
+end
+
+function GeomEnemy:setSpeed(speed)
+
+end
+
+function GeomEnemy:___onUpdateSpeed()
+
+end
+
+function GeomEnemy:destroy()
+	self.timerX:stop()
+	self.timerX = nil
+	self.timerY:stop()
+	self.timerY = nil
+	GeomObject.destroy(self)
 end

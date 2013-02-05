@@ -94,6 +94,13 @@ _P = {
 				params = {24, 24, 0},
 			},
 		},
+		[6] = {
+			[1] = {
+				time = 0,
+				action = "GeomChaser",
+				params = {24, 24},
+			},
+		},
 	},
 }
 

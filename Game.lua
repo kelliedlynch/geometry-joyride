@@ -2,7 +2,7 @@ local _L = {}
 
 _L.__index = _L
 
-_L.PATTERN_DELAY = 120
+_L.PATTERN_DELAY = 150
 
 function _L.begin(pattern)
 	local game = {}
@@ -32,13 +32,15 @@ function _L:scroll(pattern)
 
 	local framesUntilNextPattern = self.PATTERN_DELAY
 	if not pattern then pattern = #self.patterns.level1 end
+	pattern = 6
 	while self.player:isAlive() do
 		coroutine.yield()
 		if framesUntilNextPattern == 0 then
 			local patternWidth = self:renderPattern(pattern)
 			framesInCurrentPattern = (patternWidth / math.abs(self.player.speed)) * FRAME_RATE
-			pattern = math.random(1, #self.patterns.level1)
+			--pattern = math.random(1, #self.patterns.level1)
 			--pattern = #self.patterns.level1
+			pattern = 6
 			framesUntilNextPattern = math.floor(self.PATTERN_DELAY + framesInCurrentPattern)
 		elseif framesUntilNextPattern > 0 then
 			framesUntilNextPattern = framesUntilNextPattern - 1

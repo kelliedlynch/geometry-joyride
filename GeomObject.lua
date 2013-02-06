@@ -5,6 +5,7 @@
 GeomObject = inheritsFrom()
 
 function GeomObject:constructor(w, h, x, y)
+	print("spawning object")
 	if x and y then
 		self.posX = x
 		self.posY = y
@@ -83,13 +84,14 @@ end
 function GeomObject:destroy()
 	print("destroying object", self)
 	self.thread:stop()
-	self.thread = nil
+	--self.thread = nil
 	self.body:destroy()
 	_G.gameLayer:removeProp(self.shape)
 	_G.gameLayer:removeProp(self.halo)
 	_G.game.activeObjects[self] = nil
 	Dispatch.removeListener(self)
 	self = nil
+	print("finished GeomObject destroy")
 end
 
 function GeomObject:targetPlayer()

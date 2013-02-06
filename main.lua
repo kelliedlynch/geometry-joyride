@@ -2,6 +2,20 @@ require "Util"
 require "EventDispatcher"
 require "GeomObject"
 
+-- DEBUG MODE
+DEBUG = true
+
+if(DEBUG) then
+  MOAIDebugLines.setStyle ( MOAIDebugLines.PARTITION_CELLS, 2, 0, 0, 1, 1 )
+  MOAIDebugLines.setStyle ( MOAIDebugLines.PARTITION_PADDED_CELLS, 1, 0, 1, 0, 1 )
+  MOAIDebugLines.setStyle ( MOAIDebugLines.PROP_WORLD_BOUNDS, 2, 1, 0, 0, 1 )
+  MOAIDebugLines.setStyle ( MOAIDebugLines.PROP_MODEL_BOUNDS, 2, 1, 1, 0, 1 )
+  MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX, 2, 1, 0, 1, 1 )
+  --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_BASELINES, 2, 1, 1, 0, 1 )
+  --MOAIDebugLines.setStyle ( MOAIDebugLines.TEXT_BOX_LAYOUT, 2, 1, 1, 0, 1 )
+  --MOAIDebugLines.setStyle ( MOAIDebugLines.TOTAL_STYLES, 2, 1, 1, 0, 1 )
+end
+
 FRAME_RATE = 60
 -- Create the window
 local deviceHeight = MOAIEnvironment.horizontalResolution

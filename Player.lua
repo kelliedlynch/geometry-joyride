@@ -4,8 +4,8 @@ Player.DEFAULT_HEIGHT = 48
 Player.DEFAULT_COLOR = {.7, .7, 1, 1}
 Player.DEFAULT_HALO_TEXTURE = "Resources/Images/circle1glow.png"
 Player.DEFAULT_SHAPE_TEXTURE = "Resources/Images/circle1tex.png"
-Player.STARTING_SPEED = -100
-Player.MAX_SPEED = -400
+Player.STARTING_SPEED = -800
+Player.MAX_SPEED = -800
 
 function Player:constructor(w, h, x, y)
 	

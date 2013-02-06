@@ -10,7 +10,8 @@ function GeomEnemy:constructor(w, h, x, y)
 	GeomObject.constructor(self, w, h, x, y)
 
 	self.fixture = self.body:addCircle(w/2, w/2, w/2)
-	self.fixture:setFilter(FILTER_DEADLY_OBJECT)
+--	self.fixture:setFilter(FILTER_DEADLY_OBJECT)
+self.fixture:setSensor(true)
 	self.body:resetMassData()
 
 	self:renderSprite()
@@ -36,6 +37,9 @@ end
 
 function GeomEnemy:aniWave(length, amplitude)
 	self.curveLength = length
+	--------------------------------------------------------------------
+	-- I NEED TO LOOK AT THIS-- THE FORMULA IS NOT CORRECT
+	--------------------------------------------------------------------
 	local dx = -(length - (_G.game.player.speed + _G.game.player.STARTING_SPEED)/2.8)
 	self.curveX = MOAIAnimCurve.new()
 	self.curveX:reserveKeys(2)
@@ -52,20 +56,20 @@ function GeomEnemy:aniWave(length, amplitude)
 	self.curveY:setKey(5, 2, self.posY, MOAIEaseType.SOFT_EASE_IN)
 	self.curveY:setWrapMode(MOAIAnimCurve.WRAP)
 
-	self.timer = MOAITimer.new()
-	self.timer:setSpan(0, .5)
-	self.timer:setMode(MOAITimer.CONTINUE)
+	self.timerY = MOAITimer.new()
+	self.timerY:setSpan(0, .5)
+	self.timerY:setMode(MOAITimer.CONTINUE)
 
-	self.timer2 = MOAITimer.new()
-	self.timer2:setSpan(0, .5)
-	self.timer2:setMode(MOAITimer.CONTINUE)
+	self.timerX = MOAITimer.new()
+	self.timerX:setSpan(0, .5)
+	self.timerX:setMode(MOAITimer.CONTINUE)
 	self.body:setAttrLink(MOAITransform.ATTR_X_LOC, self.curveX, MOAIAnimCurve.ATTR_VALUE)
 	self.body:setAttrLink(MOAITransform.ATTR_Y_LOC, self.curveY, MOAIAnimCurve.ATTR_VALUE)
-	self.curveX:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timer2, MOAITimer.ATTR_TIME)
-	self.curveY:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timer, MOAITimer.ATTR_TIME)
+	self.curveX:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timerX, MOAITimer.ATTR_TIME)
+	self.curveY:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timerY, MOAITimer.ATTR_TIME)
 
-	self.timer:attach(self.thread)
-	self.timer2:attach(self.thread)
+	self.timerY:attach(self.thread)
+	self.timerX:attach(self.thread)
 end
 
 function GeomEnemy:setSpeed(speed)
@@ -78,8 +82,9 @@ end
 
 function GeomEnemy:destroy()
 	self.timerX:stop()
-	self.timerX = nil
+	--self.timerX = nil
 	self.timerY:stop()
-	self.timerY = nil
+	--self.timerY = nil
 	GeomObject.destroy(self)
+	print("finished GeomEnemy destroy")
 end

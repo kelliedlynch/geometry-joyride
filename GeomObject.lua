@@ -92,28 +92,6 @@ function GeomObject:destroy()
 	self = nil
 end
 
-function GeomObject:enterRight(posY)
-	if not posY then _, posY = _G.game.player.body:getPosition() end
-	self.body:setTransform(self.posX, posY)
-	local enterCurveX = MOAIAnimCurve.new()
-	enterCurveX:reserveKeys(3)
-	enterCurveX:setKey(1, 0.0, self.posX, MOAIEaseType.SHARP_EASE_OUT)
-	enterCurveX:setKey(2, 0.5, self.posX - _G.screenWidth/6, MOAIEaseType.SHARP_EASE_OUT)
-	enterCurveX:setKey(3, 1.0, self.posX - _G.screenWidth/6)
-	--enterCurveX:setWrapMode(MOAIAnimCurve.WRAP)
-	print("moving from", self.posX, "to", self.posX - _G.screenWidth/6)
-
-	local timer = MOAITimer.new()
-	timer:setSpan(0, 1)
-
-	self.body:setAttrLink(MOAITransform.ATTR_X_LOC, enterCurveX, MOAIAnimCurve.ATTR_VALUE)
-	enterCurveX:setAttrLink(MOAIAnimCurve.ATTR_TIME, timer, MOAITimer.ATTR_TIME)
-	print("after enter set", self.body:getAttrLink(MOAITransform.ATTR_X_LOC))
-	timer:attach(self.thread)
-
-	return timer
-end
-
 function GeomObject:targetPlayer()
 	self.targetX, self.targetY = _G.game.player.body:getPosition()
 end

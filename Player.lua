@@ -4,13 +4,13 @@ Player.DEFAULT_HEIGHT = 48
 Player.DEFAULT_COLOR = {.7, .7, 1, 1}
 Player.DEFAULT_HALO_TEXTURE = "Resources/Images/circle1glow.png"
 Player.DEFAULT_SHAPE_TEXTURE = "Resources/Images/circle1tex.png"
-Player.STARTING_SPEED = -800
-Player.MAX_SPEED = -800
+Player.STARTING_SPEED = -100
+Player.MAX_SPEED = -400
+Player.ACCELLERATION = .2
 
 function Player:constructor(w, h, x, y)
 	
 	local w, h, x, y = self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT, -_G.screenWidth/2 + _G.screenWidth/5, -self.DEFAULT_HEIGHT/2
-	print("creating player with params", self, w, h, x, y)
 	GeomObject.constructor(self, w, h, x, y)
 
 	self.body = _G.world:addBody(MOAIBox2DBody.DYNAMIC)
@@ -36,7 +36,7 @@ end
 
 function Player:accelerate(value)
 	if not self.speed then self.speed = self.STARTING_SPEED end
-	if not value then value = .2 end
+	if not value then value = self.ACCELLERATION end
 	if self.speed > self.MAX_SPEED then
 		self.speed = self.speed - value
 		Dispatch.triggerEvent("onUpdateSpeed")
@@ -51,6 +51,8 @@ function Player:___onUpdateSpeed()
 end
 
 function Player:isAlive()
+	self.posX, self.posY = self.body:getPosition()
+	self.centerX, self.centerY = self.posX + self.width/2, self.posY + self.height/2
 	if self.body then
 		return true
 	else

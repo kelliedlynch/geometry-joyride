@@ -3,7 +3,7 @@ require "EventDispatcher"
 require "GeomObject"
 
 -- DEBUG MODE
-DEBUG = true
+DEBUG = false
 
 if(DEBUG) then
   MOAIDebugLines.setStyle ( MOAIDebugLines.PARTITION_CELLS, 2, 0, 0, 1, 1 )
@@ -46,7 +46,7 @@ MOAISim.pushRenderPass(_G.hudLayer)
 _G.world = MOAIBox2DWorld.new()
 _G.world:setGravity(0, -9)
 _G.world:setUnitsToMeters(1/50)
-_G.world:setDebugDrawEnabled(true)
+_G.world:setDebugDrawEnabled(DEBUG)
 _G.world:start()
 _G.gameLayer:setBox2DWorld(_G.world)
 

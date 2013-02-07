@@ -35,6 +35,7 @@ end
 
 function GeomObject:animate()
 	while self.body:getPosition() > self.destroyAt do 
+		self.posX, self.posY = self.body:getPosition()
 		coroutine.yield()
 	end
 	self:destroy()
@@ -84,7 +85,6 @@ end
 function GeomObject:destroy()
 	print("destroying object", self)
 	self.thread:stop()
-	--self.thread = nil
 	self.body:destroy()
 	_G.gameLayer:removeProp(self.shape)
 	_G.gameLayer:removeProp(self.halo)
@@ -94,9 +94,9 @@ function GeomObject:destroy()
 	print("finished GeomObject destroy")
 end
 
-function GeomObject:targetPlayer()
-	self.targetX, self.targetY = _G.game.player.body:getPosition()
-end
+-- function GeomObject:targetPlayer()
+-- 	self.targetX, self.targetY = _G.game.player.body:getPosition()
+-- end
 
 require "GeomRectangle"
 require "GeomCoin"

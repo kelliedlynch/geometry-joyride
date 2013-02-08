@@ -44,7 +44,7 @@ MOAISim.pushRenderPass(_G.hudLayer)
 --------------------------------------------------------------------
 
 _G.world = MOAIBox2DWorld.new()
-_G.world:setGravity(0, -9)
+_G.world:setGravity(0, -8)
 _G.world:setUnitsToMeters(1/50)
 _G.world:setDebugDrawEnabled(DEBUG)
 _G.world:start()
@@ -101,7 +101,7 @@ function yield()
 	while touchDown do
 		if _G.game.player.body then
 			x,y = _G.game.player.shape:getLoc()
-			_G.game.player.body:applyForce(0, 2000000)
+			_G.game.player.body:applyForce(0, 1900000)
 		end
 		coroutine.yield()
 	end

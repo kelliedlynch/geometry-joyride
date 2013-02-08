@@ -1,10 +1,10 @@
-GeomChaser = inheritsFrom(GeomEnemy)
-GeomChaser.DEFAULT_CROSSHAIR_TEXTURE = "Resources/Images/crosshairs.png"
-GeomChaser.DEFAULT_CROSSHAIR_SIZE = 32
-GeomEnemy.DEFAULT_CROSSHAIR_COLOR = {1, 0, 0, 0}
+GeomSeeker = inheritsFrom(GeomEnemy)
+GeomSeeker.DEFAULT_CROSSHAIR_TEXTURE = "Resources/Images/crosshairs.png"
+GeomSeeker.DEFAULT_CROSSHAIR_SIZE = 32
+GeomSeeker.DEFAULT_CROSSHAIR_COLOR = {1, 0, 0, 0}
 
 
-function GeomChaser:constructor(w, h, x, y)
+function GeomSeeker:constructor(w, h, x, y)
 	if x and y then
 		self.posX = x
 		self.posY = y
@@ -18,7 +18,7 @@ function GeomChaser:constructor(w, h, x, y)
 	GeomEnemy.constructor(self, w, h, self.posX, self.posY)
 end
 
-function GeomChaser:animate()
+function GeomSeeker:animate()
 	local timer = self:enterRight()
 	while timer:getTime() < .5 do
 		coroutine.yield()
@@ -31,15 +31,14 @@ function GeomChaser:animate()
 	while timer:getTime() < 1 do
 		coroutine.yield()
 	end
-	while self.body:getWorldLoc() > self.destroyAt do 
-		local x = self.body:getWorldLoc()
+	while timer:getTime() < 3.5 do 
 		coroutine.yield()	
 	end
 	self:destroy()
 	print("after destroy")
 end
 
-function GeomChaser:enterRight(posY)
+function GeomSeeker:enterRight(posY)
 	self.curveX = MOAIAnimCurve.new()
 	self.curveX:reserveKeys(5)
 	self.curveX:setKey(1, 0.0, self.posX, MOAIEaseType.SHARP_EASE_OUT)
@@ -73,7 +72,7 @@ function GeomChaser:enterRight(posY)
 	return self.timerX
 end
 
-function GeomChaser:flashCrosshairs()
+function GeomSeeker:flashCrosshairs()
 	local crosshairCurve = MOAIAnimCurve.new()
 	crosshairCurve:reserveKeys(2)
 	crosshairCurve:setKey(1, 0.0, .5, MOAIEaseType.SOFT_EASE_OUT)
@@ -106,9 +105,10 @@ function GeomChaser:flashCrosshairs()
 	alphaCurve:setAttrLink(MOAIAnimCurve.ATTR_TIME, self.timerX, MOAITimer.ATTR_TIME)
 end
 
-function GeomChaser:destroy()
+function GeomSeeker:destroy()
+	self.body:setLinearVelocity(0,0)
 	_G.gameLayer:removeProp(self.crosshairs)
 
 	GeomEnemy.destroy(self)
-	print("finished GeomChaser destroy")
+	print("finished GeomSeeker destroy")
 end

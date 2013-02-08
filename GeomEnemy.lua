@@ -91,3 +91,5 @@ function GeomEnemy:destroy()
 	GeomObject.destroy(self)
 	print("finished GeomEnemy destroy")
 end
+
+require "GeomSeeker"
